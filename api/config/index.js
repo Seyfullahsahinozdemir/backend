@@ -7,7 +7,7 @@ module.exports = {
   DB_DIALECT: process.env.DB_DIALECT,
   PORT: process.env.PORT || "3000",
   JWT: {
-    SECRET: "",
+    SECRET: process.env.SECRET_KEY,
     EXPIRE_TIME: !isNaN(parseInt(process.env.TOKEN_EXPIRE_TIME))
       ? parseInt(process.env.TOKEN_EXPIRE_TIME)
       : 24 * 60 * 60,

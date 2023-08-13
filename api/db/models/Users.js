@@ -24,7 +24,10 @@ const User = sequelize.define("user", {
   password: {
     type: Sequelize.STRING,
     allowNull: false,
-    trim: true,
+  },
+  birthDate: {
+    type: Sequelize.DATEONLY,
+    allowNull: false,
   },
   isAdmin: {
     type: Sequelize.BOOLEAN,

@@ -1,9 +1,14 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
+const authLib = require("../lib/auth");
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const { register, login } = require("../controllers/users");
+
+router.post("/register", register);
+router.post("/login", login);
+
+// router.all("*", authLib.authenticate(), (req, res, next) => {
+//   next();
+// });
 
 module.exports = router;

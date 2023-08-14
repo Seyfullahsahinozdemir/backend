@@ -123,7 +123,7 @@ function onListening() {
   debug("Listening on " + bind);
 
   sequelize
-    .sync({ force: true })
+    .sync()
     .then(() => {
       console.log("Tables synchronized successfully.");
     })

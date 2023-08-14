@@ -43,5 +43,10 @@ module.exports = function () {
     authenticate: function () {
       return passport.authenticate("jwt", { session: false });
     },
+    checkRoles: (...expectedRoles) => {
+      return (req, res, next) => {
+        return next(); // authorized
+      };
+    },
   };
 };

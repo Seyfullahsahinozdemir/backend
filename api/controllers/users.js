@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const is = require("is_js");
 const config = require("../config");
 const jwt = require("jwt-simple");
+const Address = require("../db/models/Addresses");
 
 exports.register = async (req, res, next) => {
   let body = req.body;
@@ -106,6 +107,74 @@ exports.login = async (req, res, next) => {
 
     let token = jwt.encode(payload, config.JWT.SECRET);
     res.json(Response.successResponse({ token, user: { userData } }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+};
+
+exports.addAddress = async (req, res, next) => {
+  let { name, lastName, phoneNumber, description } = req.body;
+  const userId = req.user.id;
+
+  try {
+    await Address.create({
+      name: name,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+      description: description,
+      userId: userId,
+    });
+
+    res.json(Response.successResponse({ success: true }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+};
+
+exports.getAddresses = async (req, res, next) => {
+  const userId = req.user.id;
+  try {
+    const addresses = await Address.findAll({ where: { userId: userId } });
+    res.json(Response.successResponse(addresses));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+};
+
+exports.updateAddress = async (req, res, next) => {
+  let { name, lastName, phoneNumber, description } = req.body;
+  let id = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    await Address.update(
+      {
+        name: name,
+        lastName: lastName,
+        phoneNumber: phoneNumber,
+        description: description,
+      },
+      { where: { id: id, userId: userId } }
+    );
+
+    res.json(Response.successResponse({ success: true }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+};
+
+exports.deleteAddress = async (req, res, next) => {
+  let id = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    await Address.destroy({ where: { id: id, userId: userId } });
+
+    res.json(Response.successResponse({ success: true }));
   } catch (error) {
     let errorResponse = Response.errorResponse(error);
     res.status(errorResponse.code).json(errorResponse);

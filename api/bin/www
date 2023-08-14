@@ -21,6 +21,7 @@ const Order = require("../db/models/Order.js");
 const OrderItem = require("../db/models/OrderItem.js");
 const Product = require("../db/models/Product.js");
 const User = require("../db/models/Users.js");
+const Menu = require("../db/models/Menu");
 
 Address.belongsTo(User);
 User.hasMany(Address, { as: "addresses" });
@@ -45,6 +46,15 @@ CartItem.belongsTo(Product);
 
 Category.hasMany(Product);
 Product.belongsTo(Category);
+
+Menu.belongsToMany(Product, { through: "MenuFood" });
+Product.belongsToMany(Menu, { through: "MenuFood" });
+
+Category.hasMany(Menu);
+Menu.belongsTo(Category);
+
+Address.hasMany(Order);
+Order.belongsTo(Address);
 
 /**
  * Get port from environment and store in Express.

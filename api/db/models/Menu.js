@@ -1,10 +1,14 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../Database");
 
-const Category = sequelize.define("category", {
+const Menu = sequelize.define("menu", {
   name: {
     type: Sequelize.STRING,
-    unique: true,
+    allowNull: false,
+  },
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
   },
   description: {
     type: Sequelize.STRING,
@@ -16,4 +20,4 @@ const Category = sequelize.define("category", {
   },
 });
 
-module.exports = Category;
+module.exports = Menu;

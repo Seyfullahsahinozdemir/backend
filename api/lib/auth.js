@@ -43,9 +43,22 @@ module.exports = function () {
     authenticate: function () {
       return passport.authenticate("jwt", { session: false });
     },
-    checkRoles: (...expectedRoles) => {
+    isAdmin: () => {
       return (req, res, next) => {
-        return next(); // authorized
+        const user = req.user;
+
+        if (!user.isAdmin) {
+          let response = Response.errorResponse(
+            new CustomError(
+              HTTP_CODES.UNAUTHORIZED,
+              "Need Permission",
+              "Need Permission"
+            )
+          );
+          return res.status(response.code).json(response);
+        }
+
+        return next(); // admin
       };
     },
   };

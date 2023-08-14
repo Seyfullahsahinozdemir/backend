@@ -136,7 +136,10 @@ exports.addAddress = async (req, res, next) => {
 exports.getAddresses = async (req, res, next) => {
   const userId = req.user.id;
   try {
-    const addresses = await Address.findAll({ where: { userId: userId } });
+    const addresses = await Address.findAll({
+      attributes: ["id", "name", "lastName", "phoneNumber", "description"],
+      where: { userId: userId },
+    });
     res.json(Response.successResponse(addresses));
   } catch (error) {
     let errorResponse = Response.errorResponse(error);

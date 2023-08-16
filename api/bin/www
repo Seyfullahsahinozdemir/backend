@@ -29,7 +29,7 @@ User.hasMany(Address, { as: "addresses" });
 Cart.belongsTo(User);
 User.hasOne(Cart);
 
-Cart.hasMany(CartItem);
+Cart.hasMany(CartItem, { onDelete: "CASCADE", hooks: true });
 CartItem.belongsTo(Cart);
 
 Order.belongsTo(User);

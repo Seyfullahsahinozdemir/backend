@@ -78,7 +78,7 @@ exports.getCategories = async (req, res, next) => {
     const categories = await Category.findAll({
       attributes: ["id", "name", "description"],
     });
-    res.json(Response.successResponse(categories));
+    res.json(Response.successResponse({ categories }));
   } catch (error) {
     let errorResponse = Response.errorResponse(error);
     res.status(errorResponse.code).json(errorResponse);

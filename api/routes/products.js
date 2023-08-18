@@ -7,9 +7,11 @@ const {
   getProducts,
   updateProduct,
   deleteProduct,
+  getByCategoryId,
 } = require("../controllers/products");
 
 router.get("/", getProducts);
+router.get("/getByCategoryId", getByCategoryId);
 router.all("*", authLib.authenticate(), (req, res, next) => {
   next();
 });

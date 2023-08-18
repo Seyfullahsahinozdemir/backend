@@ -16,6 +16,7 @@ const Product = sequelize.define("product", {
   createdBy: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    defaultValue: 1
   },
 });
 

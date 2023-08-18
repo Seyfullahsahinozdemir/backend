@@ -13,6 +13,8 @@ const Category = sequelize.define("category", {
   createdBy: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    defaultValue: 1
+
   },
 });
 

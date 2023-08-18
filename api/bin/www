@@ -56,6 +56,7 @@ Menu.belongsTo(Category);
 Address.hasMany(Order);
 Order.belongsTo(Address);
 
+
 /**
  * Get port from environment and store in Express.
  */
@@ -126,18 +127,100 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
-function onListening() {
+async function onListening() {
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
 
-  sequelize
-    .sync()
-    .then(() => {
-      console.log("Tables synchronized successfully.");
-    })
-    .catch((error) => {
-      console.error("An error occurred while synchronizing tables:", error);
-    });
+  sequelize.sync();
+
+  const adminUser = {
+    firstName: "admin",
+    lastName: "admin",
+    email: "admin@gmail.com",
+    password: "1123456789",
+    birthDate: "1990-01-01",
+    isAdmin: true,
+  };
+  const existAdmin = await User.findOne({
+    where: { email: "admin@gmail.com" },
+  });
+  if (!existAdmin) {
+    const abc = await User.create(adminUser);
+  }
+
+  const categories = await Category.bulkCreate([
+    {
+      name: "Yemek",
+      description: "Lezzetli yemekler",
+      createdBy: adminUser.id,
+    },
+    {
+      name: "İçecek",
+      description: "Serinletici içecekler",
+      createdBy: adminUser.id,
+    },
+    { name: "Tatlı", description: "Tatlı lezzetler", createdBy: adminUser.id },
+  ]);
+
+  console.log(adminUser, categories);
+
+  const products = [
+    {
+      name: "Tavuk Şiş",
+      price: 25.0,
+      categoryId: categories[0].id,
+      createdBy: 1,
+    },
+    {
+      name: "Spagetti Bolonez",
+      price: 18.5,
+      categoryId: categories[0].id,
+      createdBy: 1,
+    },
+    {
+      name: "Hamburger",
+      price: 15.0,
+      categoryId: categories[0].id,
+      createdBy: 1,
+    },
+    {
+      name: "Meyve Suyu",
+      price: 6.0,
+      categoryId: categories[1].id,
+      createdBy: 1,
+    },
+    {
+      name: "Limonata",
+      price: 5.0,
+      categoryId: categories[1].id,
+      createdBy: 1,
+    },
+    {
+      name: "Kola",
+      price: 4.5,
+      categoryId: categories[1].id,
+      createdBy: 1,
+    },
+    {
+      name: "Browni",
+      price: 10.0,
+      categoryId: categories[2].id,
+      createdBy: 1,
+    },
+    {
+      name: "Baklava",
+      price: 12.0,
+      categoryId: categories[2].id,
+      createdBy: 1,
+    },
+    {
+      name: "Cheesecake",
+      price: 14.0,
+      categoryId: categories[2].id,
+      createdBy: 1,
+    },
+  ];
+
+  await Product.bulkCreate(products);
 }

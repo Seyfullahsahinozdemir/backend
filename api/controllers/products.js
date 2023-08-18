@@ -5,6 +5,7 @@ const CustomError = require("../lib/Error");
 const Enum = require("../config/Enum");
 const is = require("is_js");
 const config = require("../config");
+const { Op } = require('sequelize');
 
 exports.addProduct = async (req, res, next) => {
   let { name, price, description, categoryId } = req.body;
@@ -108,9 +109,48 @@ exports.deleteProduct = async (req, res, next) => {
 };
 
 exports.getProducts = async (req, res, next) => {
+  const { name } = req.query;
+
   try {
-    const products = await Product.findAll();
-    res.json(Response.successResponse(products));
+    if (!name) {
+      const products = await Product.findAll();
+      res.json(Response.successResponse(products));
+    } else {
+      const products = await Product.findAll({
+        where: {
+          name: {
+            [Op.like]: `%${name}%`
+          }
+        },
+      });
+      res.json(Response.successResponse(products));
+    }
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+};
+
+exports.getByCategoryId = async (req, res, next) => {
+  const { categoryId } = req.body;
+  try {
+    const existingCategory = await Category.findOne({
+      where: { id: categoryId },
+    });
+
+    if (!existingCategory) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error!",
+        "unkown category"
+      );
+    }
+
+    const products = await Product.findAll({
+      where: { categoryId: categoryId },
+    });
+
+    res.json(Response.successResponse({ products }));
   } catch (error) {
     let errorResponse = Response.errorResponse(error);
     res.status(errorResponse.code).json(errorResponse);

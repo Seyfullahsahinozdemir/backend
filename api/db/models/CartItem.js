@@ -12,6 +12,14 @@ const CartItem = sequelize.define("cartItem", {
     autoIncrement: true,
   },
   quantity: Sequelize.INTEGER,
+  productId: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
+  menuId: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
 });
 
 module.exports = CartItem;

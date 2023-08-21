@@ -29,4 +29,8 @@ router.put("/products/:id", increaseCartItemByOne);
 router.put("/products/:id", decreaseCartItemByOne);
 router.delete("/products/:id", deleteCartItem);
 
+//router.put("/menus/:id", increaseMenuCartItemByOne);
+//router.put("/menus/:id", decreaseMenuCartItemByOne);
+//router.delete("/menus/:id", deleteMenuCartItem);
+
 module.exports = router;

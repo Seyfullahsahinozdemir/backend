@@ -1,6 +1,7 @@
 const Cart = require("../db/models/Cart");
 const CartItem = require("../db/models/CartItem");
 const Product = require("../db/models/Product");
+const Menu = require("../db/models/Menu");
 const Order = require("../db/models/Order");
 const OrderItem = require("../db/models/OrderItem");
 const Address = require("../db/models/Addresses");
@@ -33,8 +34,16 @@ exports.completeOrder = async (req, res, next) => {
 
     const cartItems = await CartItem.findAll({
       where: { cartId: req.user.cartId },
-      include: [{ model: Product }],
+      include: [{ model: Product }, { model: Menu }],
     });
+
+    if (cartItems.length < 1) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error!",
+        "Your cart is empty"
+      );
+    }
 
     const order = await Order.create({
       userId: req.user.id,
@@ -45,11 +54,16 @@ exports.completeOrder = async (req, res, next) => {
     for (let cartItem of cartItems) {
       await OrderItem.create({
         orderId: order.id,
-        productId: cartItem.product.id,
-        price: cartItem.product.price * cartItem.quantity,
+        productId: cartItem.product?.id,
+        menuId: cartItem.menu?.id,
+        price: cartItem.product
+          ? cartItem.product.price
+          : cartItem.menu.price * cartItem.quantity,
         quantity: cartItem.quantity,
       });
-      order.totalPrice += cartItem.product.price * cartItem.quantity;
+      order.totalPrice += cartItem.product
+        ? cartItem.product.price * cartItem.quantity
+        : cartItem.menu.price * cartItem.quantity;
     }
     order.save();
     await Cart.destroy({ where: { id: req.user.cartId } });
@@ -71,6 +85,7 @@ exports.getOrderDetailById = async (req, res, next) => {
 
 exports.reOrder = async (req, res, next) => {
   const orderId = req.params.id;
+  const { addressId } = req.body;
   try {
     if (!orderId) {
       throw new CustomError(
@@ -92,9 +107,19 @@ exports.reOrder = async (req, res, next) => {
       );
     }
 
+    const existingAddress = await Address.findOne({ where: { id: addressId } });
+
+    if (!existingAddress) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error!",
+        "Unknown Address"
+      );
+    }
+
     const newOrder = await Order.create({
       userId: existingOrder.userId,
-      addressId: existingOrder.addressId,
+      addressId: addressId ? addressId : existingOrder.addressId,
       totalPrice: existingOrder.totalPrice,
     });
 
@@ -108,6 +133,7 @@ exports.reOrder = async (req, res, next) => {
         price: orderItem.price,
         orderId: newOrder.id,
         productId: orderItem.productId,
+        menuId: orderItem.menuId,
       });
     }
 

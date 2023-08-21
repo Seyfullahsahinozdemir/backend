@@ -14,7 +14,6 @@ router.all("*", authLib.authenticate(), (req, res, next) => {
   next();
 });
 
-// Address End Points
 router.post("/", authLib.isAdmin(), addMenu);
 router.put("/:id", authLib.isAdmin(), updateMenu);
 router.delete("/:id", authLib.isAdmin(), deleteMenu);

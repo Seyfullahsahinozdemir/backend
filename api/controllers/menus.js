@@ -177,7 +177,16 @@ exports.deleteMenu = async (req, res, next) => {
 exports.getMenus = async (req, res, next) => {
   try {
     const menus = await Menu.findAll({
-      include: Product,
+      include: [
+        {
+          model: Product,
+          attributes: ["id", "name", "price", "description"],
+          through: { attributes: [] },
+        },
+      ],
+      attributes: {
+        exclude: ["createdAt", "updatedAt", "createdBy", "categoryId"],
+      },
     });
 
     res

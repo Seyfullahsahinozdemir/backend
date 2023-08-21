@@ -16,7 +16,6 @@ router.all("*", authLib.authenticate(), (req, res, next) => {
   next();
 });
 
-// Address End Points
 router.post("/", authLib.isAdmin(), addProduct);
 router.put("/:id", authLib.isAdmin(), updateProduct);
 router.delete("/:id", authLib.isAdmin(), deleteProduct);

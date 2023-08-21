@@ -42,8 +42,14 @@ OrderItem.belongsTo(Order);
 OrderItem.belongsTo(Product);
 Product.hasMany(OrderItem);
 
+OrderItem.belongsTo(Menu);
+Menu.hasMany(OrderItem);
+
 Product.hasMany(CartItem);
 CartItem.belongsTo(Product);
+
+CartItem.belongsTo(Menu);
+Menu.hasMany(CartItem);
 
 Category.hasMany(Product);
 Product.belongsTo(Category);
@@ -132,7 +138,7 @@ async function onListening() {
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
 
-  sequelize.sync();
+  await sequelize.sync();
   let password = bcrypt.hashSync("123456789", bcrypt.genSaltSync(8), null);
   const adminUser = {
     firstName: "admin",
@@ -177,55 +183,55 @@ async function onListening() {
     {
       name: "Tavuk Şiş",
       price: 25.0,
-      categoryId: categories[0].id,
+      categoryId: 1,
       createdBy: 1,
     },
     {
       name: "Spagetti Bolonez",
       price: 18.5,
-      categoryId: categories[0].id,
+      categoryId: 1,
       createdBy: 1,
     },
     {
       name: "Hamburger",
       price: 15.0,
-      categoryId: categories[0].id,
+      categoryId: 1,
       createdBy: 1,
     },
     {
       name: "Meyve Suyu",
       price: 6.0,
-      categoryId: categories[1].id,
+      categoryId: 2,
       createdBy: 1,
     },
     {
       name: "Limonata",
       price: 5.0,
-      categoryId: categories[1].id,
+      categoryId: 2,
       createdBy: 1,
     },
     {
       name: "Kola",
       price: 4.5,
-      categoryId: categories[1].id,
+      categoryId: 2,
       createdBy: 1,
     },
     {
       name: "Browni",
       price: 10.0,
-      categoryId: categories[2].id,
+      categoryId: 3,
       createdBy: 1,
     },
     {
       name: "Baklava",
       price: 12.0,
-      categoryId: categories[2].id,
+      categoryId: 3,
       createdBy: 1,
     },
     {
       name: "Cheesecake",
       price: 14.0,
-      categoryId: categories[2].id,
+      categoryId: 3,
       createdBy: 1,
     },
   ];

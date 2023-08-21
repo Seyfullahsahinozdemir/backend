@@ -5,7 +5,7 @@ const CustomError = require("../lib/Error");
 const Enum = require("../config/Enum");
 const is = require("is_js");
 const config = require("../config");
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 
 exports.addProduct = async (req, res, next) => {
   let { name, price, description, categoryId } = req.body;
@@ -119,8 +119,8 @@ exports.getProducts = async (req, res, next) => {
       const products = await Product.findAll({
         where: {
           name: {
-            [Op.like]: `%${name}%`
-          }
+            [Op.like]: `%${name}%`,
+          },
         },
       });
       res.json(Response.successResponse(products));
@@ -142,7 +142,7 @@ exports.getByCategoryId = async (req, res, next) => {
       throw new CustomError(
         Enum.HTTP_CODES.BAD_REQUEST,
         "Validation Error!",
-        "unkown category"
+        "unknown category"
       );
     }
 

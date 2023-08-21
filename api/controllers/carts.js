@@ -6,6 +6,8 @@ const CustomError = require("../lib/Error");
 const Enum = require("../config/Enum");
 const is = require("is_js");
 const config = require("../config");
+const Menu = require("../db/models/Menu");
+const { Sequelize } = require("sequelize");
 
 exports.getCartItems = async (req, res, next) => {
   const cartId = req.user.cartId;
@@ -14,7 +16,21 @@ exports.getCartItems = async (req, res, next) => {
     const cartItems = await CartItem.findAll({
       where: { cartId },
       include: [
-        { model: Product, attributes: ["id", "name", "price", "description"] },
+        {
+          model: Product,
+          attributes: ["id", "name", "price"],
+        },
+        {
+          model: Menu,
+          attributes: ["id", "name", "price"],
+          include: {
+            model: Product,
+            attributes: ["id", "name", "price"],
+            through: {
+              attributes: [],
+            },
+          },
+        },
       ],
       attributes: ["id", "quantity"],
     });
@@ -26,30 +42,52 @@ exports.getCartItems = async (req, res, next) => {
 };
 
 exports.addCartItem = async (req, res, next) => {
-  const { product } = req.body;
+  const { product, menu } = req.body;
   try {
-    if (!product || !product.id) {
+    if ((!product && !menu) || (product && menu)) {
       throw new CustomError(
         Enum.HTTP_CODES.BAD_REQUEST,
         "Validation Error!",
-        "wrong product format."
+        "Just send product or menu"
       );
     }
 
-    const existingProduct = await Product.findOne({
-      where: { id: product.id },
-    });
+    if (product) {
+      const existingProduct = await Product.findOne({
+        where: { id: product.id },
+      });
 
-    if (!existingProduct) {
-      throw new CustomError(
-        Enum.HTTP_CODES.BAD_REQUEST,
-        "Validation Error!",
-        "Unknown product."
-      );
+      if (!existingProduct) {
+        throw new CustomError(
+          Enum.HTTP_CODES.BAD_REQUEST,
+          "Validation Error!",
+          "Unknown product."
+        );
+      }
+    }
+
+    if (menu) {
+      const existingMenu = await Menu.findOne({
+        where: { id: menu.id },
+      });
+
+      if (!existingMenu) {
+        throw new CustomError(
+          Enum.HTTP_CODES.BAD_REQUEST,
+          "Validation Error!",
+          "Unknown menu."
+        );
+      }
     }
 
     const existingCartItem = await CartItem.findOne({
-      where: { cartId: req.user.cartId, productId: product.id },
+      where: {
+        cartId: req.user.cartId,
+        [Sequelize.Op.or]: [
+          product ? { productId: product.id } : null,
+          menu ? { menuId: menu.id } : null,
+        ].filter(Boolean),
+      },
     });
 
     if (existingCartItem) {
@@ -58,7 +96,8 @@ exports.addCartItem = async (req, res, next) => {
     } else {
       await CartItem.create({
         quantity: 1,
-        productId: product.id,
+        productId: product?.id,
+        menuId: menu?.id,
         cartId: req.user.cartId,
       });
     }
@@ -87,5 +126,17 @@ exports.decreaseCartItemByOne = async (req, res, next) => {
 };
 
 exports.deleteCartItem = async (req, res, next) => {
+  console.log("deleteCartItem");
+};
+
+exports.increaseMenuCartItemByOne = async (req, res, next) => {
+  console.log("increaseCartItemByOne");
+};
+
+exports.decreaseMenuCartItemByOne = async (req, res, next) => {
+  console.log("decreaseCartItemByOne");
+};
+
+exports.deleteMenuCartItem = async (req, res, next) => {
   console.log("deleteCartItem");
 };

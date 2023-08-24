@@ -140,3 +140,31 @@ exports.decreaseMenuCartItemByOne = async (req, res, next) => {
 exports.deleteMenuCartItem = async (req, res, next) => {
   console.log("deleteCartItem");
 };
+
+exports.getTotalPrice = async (req, res, next) => {
+  // kullanıcının depet id'sine ulaştık
+  const cartId = req.user.cartId;
+  try {
+    // kullanıcının sepetinde yer alna tüm ürünlere ulaştık, cartitem tablosunda productid değeri yer aldığı için ürünün fiyat bilgisine include product ile ulaşabiliriz.
+    const cartItems = await CartItem.findAll({
+      where: { cartId },
+      include: [{ model: Product }, { model: Menu }],
+    });
+
+    let sum = 0;
+    // sepetteki ürünleri tek tek gezdik ve quantity ile price bilgilerini çarptık
+    for (let item of cartItems) {
+      console.log(item.product);
+      console.log(item.menu);
+
+      sum += item.quantity * (item.product ? item.product.price : 0);
+
+      sum += item.quantity * (item.menu ? item.menu.price : 0);
+    }
+
+    res.json(Response.successResponse({ totalPrice: sum }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+};

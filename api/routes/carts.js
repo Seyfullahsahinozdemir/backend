@@ -10,6 +10,7 @@ const {
   increaseCartItemByOne,
   decreaseCartItemByOne,
   getTotalPrice,
+  updateCartItemQuantity,
 } = require("../controllers/carts");
 
 const checkCartMiddleware = require("../lib/cart");
@@ -27,9 +28,10 @@ router.get("/", getCartItems);
 router.post("/", addCartItem);
 router.delete("/", clearCart);
 
-router.put("/products/:id", increaseCartItemByOne);
-router.put("/products/:id", decreaseCartItemByOne);
+router.put("/products/increase/:id", increaseCartItemByOne);
+router.put("/products/decrease/:id", decreaseCartItemByOne);
 router.delete("/products/:id", deleteCartItem);
+router.put("/products/:id", updateCartItemQuantity)
 
 //router.put("/menus/:id", increaseMenuCartItemByOne);
 //router.put("/menus/:id", decreaseMenuCartItemByOne);

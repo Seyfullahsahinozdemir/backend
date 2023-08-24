@@ -76,7 +76,44 @@ exports.completeOrder = async (req, res, next) => {
 };
 
 exports.getOrderDetailById = async (req, res, next) => {
+  const orderId = req.params.id;
   try {
+    const order = await Order.findOne({
+      where: { userId: req.user.id, id: orderId },
+      include: [{ model: Address }],
+    });
+
+    if (!order) {
+      return res.json(Response.successResponse({}));
+    }
+
+    const orderItems = await OrderItem.findAll({
+      where: { orderId: order.id },
+      include: [{ model: Product }, { model: Menu }],
+    });
+
+    const orderInfo = {
+      orderInfo: {
+        id: order.id,
+        totalPrice: order.totalPrice,
+        address: order.address,
+        createdAt: order.createdAt,
+      },
+      items: orderItems.map((item) => {
+        return {
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+          orderId: item.orderId,
+          productId: item.productId,
+          menuId: item.menuId,
+          product: item.product,
+          menu: item.menu,
+        };
+      }),
+    };
+
+    res.json(Response.successResponse(orderInfo));
   } catch (error) {
     let errorResponse = Response.errorResponse(error);
     res.status(errorResponse.code).json(errorResponse);
@@ -146,6 +183,43 @@ exports.reOrder = async (req, res, next) => {
 
 exports.getPastOrders = async (req, res, next) => {
   try {
+    const orders = await Order.findAll({
+      where: { userId: req.user.id },
+      include: [{ model: Address }],
+    });
+
+    const result = [];
+
+    for (let order of orders) {
+      const orderItems = await OrderItem.findAll({
+        where: { orderId: order.id },
+        include: [{ model: Product }, { model: Menu }],
+      });
+
+      const orderInfo = {
+        orderInfo: {
+          id: order.id,
+          totalPrice: order.totalPrice,
+          address: order.address,
+          createdAt: order.createdAt,
+        },
+        items: orderItems.map((item) => {
+          return {
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            orderId: item.orderId,
+            productId: item.productId,
+            menuId: item.menuId,
+            product: item.product,
+            menu: item.menu,
+          };
+        }),
+      };
+      result.push(orderInfo);
+    }
+
+    res.json(Response.successResponse(result));
   } catch (error) {
     let errorResponse = Response.errorResponse(error);
     res.status(errorResponse.code).json(errorResponse);

@@ -114,31 +114,111 @@ exports.addCartItem = async (req, res, next) => {
 };
 
 exports.clearCart = async (req, res, next) => {
-  console.log("clearCart");
+  const cartId = req.user.cartId;
+
+  try {
+    await CartItem.destroy({ where: { cartId } });
+    res.json(Response.successResponse({ message: 'Cart cleared.' }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
 };
 
 exports.increaseCartItemByOne = async (req, res, next) => {
-  console.log("increaseCartItemByOne");
+  const cartItemId = req.params.id;
+
+  try {
+    const cartItem = await CartItem.findOne({where:{id: cartItemId, cartId: req.user.cartId}});
+    if (cartItem) {
+      cartItem.quantity += 1;
+      await cartItem.save();
+      res.json(Response.successResponse({ success: true }));
+    } else {
+      throw new CustomError(
+        Enum.HTTP_CODES.NOT_FOUND,
+        'Cart Item Not Found',
+        'The specified cart item was not found.'
+      );
+    }
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
 };
 
 exports.decreaseCartItemByOne = async (req, res, next) => {
-  console.log("decreaseCartItemByOne");
+  const cartItemId = req.params.id;
+
+  try {
+    const cartItem = await CartItem.findOne({where:{id: cartItemId, cartId: req.user.cartId}});
+    if (cartItem) {
+      if (cartItem.quantity > 1) {
+        cartItem.quantity -= 1;
+        await cartItem.save();
+      } else {
+        await cartItem.destroy();
+      }
+      res.json(Response.successResponse({ success: true }));
+    } else {
+      throw new CustomError(
+        Enum.HTTP_CODES.NOT_FOUND,
+        'Cart Item Not Found',
+        'The specified cart item was not found.'
+      );
+    }
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
 };
+
 
 exports.deleteCartItem = async (req, res, next) => {
-  console.log("deleteCartItem");
+  const cartItemId = req.params.id;
+
+  try {
+    const cartItem = await CartItem.findOne({where:{id: cartItemId, cartId: req.user.cartId}});
+    if (cartItem) {
+      await cartItem.destroy();
+      res.json(Response.successResponse({ success: true }));
+    } else {
+      throw new CustomError(
+        Enum.HTTP_CODES.NOT_FOUND,
+        'Cart Item Not Found',
+        'The specified cart item was not found.'
+      );
+    }
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
 };
 
-exports.increaseMenuCartItemByOne = async (req, res, next) => {
-  console.log("increaseCartItemByOne");
-};
+exports.updateCartItemQuantity = async (req, res, next) => {
+  const cartItemId = req.params.id;
+  let newQuantity = req.body.quantity;
 
-exports.decreaseMenuCartItemByOne = async (req, res, next) => {
-  console.log("decreaseCartItemByOne");
-};
-
-exports.deleteMenuCartItem = async (req, res, next) => {
-  console.log("deleteCartItem");
+  try {
+    const cartItem = await CartItem.findOne({where:{id: cartItemId, cartId: req.user.cartId}});
+    if (cartItem) {
+      if (newQuantity < 1) {
+        newQuantity = 1
+      }
+      cartItem.quantity = newQuantity;
+      await cartItem.save();
+      res.json(Response.successResponse({ success: true }));
+    } else {
+      throw new CustomError(
+        Enum.HTTP_CODES.NOT_FOUND,
+        'Cart Item Not Found',
+        'The specified cart item was not found.'
+      );
+    }
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
 };
 
 exports.getTotalPrice = async (req, res, next) => {

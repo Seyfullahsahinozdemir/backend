@@ -11,7 +11,7 @@ const {
 } = require("../controllers/products");
 
 router.get("/", getProducts);
-router.get("/getByCategoryId", getByCategoryId);
+router.post("/getByCategoryId", getByCategoryId);
 router.all("*", authLib.authenticate(), (req, res, next) => {
   next();
 });
